@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-2^msn1*0vpfm2r$xf5a@3zm3bfoizr3_ky&kcmw-i)r=8t#^0k
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost']
+ALLOWED_HOSTS = ['localhost','127.0.0.1']
 
 
 # Application definition
@@ -75,6 +75,7 @@ WSGI_APPLICATION = 'alan.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
 
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
@@ -86,6 +87,7 @@ DATABASES = {
     }
 }
 
+#padrao django
 # DATABASES = {
 #     'default': {
 #         'ENGINE': 'django.db.backends.sqlite3',
