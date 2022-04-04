@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 version: "3.9"
 
 services:
@@ -17,4 +18,25 @@ services:
     ports:
     - "8000:8000"
     depends_on:
+=======
+version: "3.9"
+
+services:
+  db:
+    image: postgres
+    volumes:
+    - .data/db:/var/lib/postgresql/data
+    environment:
+    - POSTGRES_DB=postgres
+    - POSTGRES_USER=postgres
+    - POSTGRES_PASSWORD=postgres
+  web:
+    build: .
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+    - .:/code
+    ports:
+    - "8000:8000"
+    depends_on:
+>>>>>>> 4c1e03151ce5a177d1c8621d1a5dd57a435c6ed5
     - db
