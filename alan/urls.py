@@ -1,11 +1,11 @@
 from django.contrib import admin
 from django.urls import path, include
+
 from rest_framework import routers
 from corev1.views import OrganizationView, UserView
 
 router = routers.DefaultRouter()
 
-# registra suas outras rotas
 router.register('user', UserView, basename = 'User')
 router.register('organization', OrganizationView, basename = 'Organization')
 
