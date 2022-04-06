@@ -31,4 +31,7 @@ docker-compose up
 * localhost:8000/v1.0/register/user
 * localhost:8000/v1.0/register/organization
   
-  Até o momento atual do projeto apenas requests do tipo GET e POST são permitidas
+  Até o momento apenas requests do tipo GET e POST são permitidas
+
+## 📙 Swagger(Manual dos endpoints)
+* localhost:8000/swagger/

@@ -1,20 +1,12 @@
-from rest_framework import viewsets
 from corev1.models import OrganizationModel, UserModel
 from corev1.serializer import UserSerializer, OrganizationSerializer
-
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-
-# class UserView(viewsets.ModelViewSet):
-# 	queryset = UserModel.objects.all()
-# 	serializer_class = UserSerializer
-
-# class OrganizationView(viewsets.ModelViewSet):
-# 	queryset = OrganizationModel.objects.all()
-# 	serializer_class = OrganizationSerializer
+from drf_yasg.utils import swagger_auto_schema
 
 class UserView(APIView):
+    @swagger_auto_schema(request_body=UserSerializer, responses={status.HTTP_200_OK: UserSerializer})
     def post(self, request):
         serializer = UserSerializer(data=request.data)
         if serializer.is_valid():
@@ -23,6 +15,7 @@ class UserView(APIView):
         else:
             return Response({"message": "Erro ao cadastrar usuário, confira os campos", "data": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
+    @swagger_auto_schema(request_body=None, responses={status.HTTP_200_OK: UserSerializer})
     def get(self, request, id=None):
         if id:
             usuario = UserModel.objects.get(id=id)
@@ -32,8 +25,10 @@ class UserView(APIView):
         items = UserModel.objects.all()
         serializer = UserSerializer(items, many=True)
         return Response({"message": "Busca completa", "data": serializer.data}, status=status.HTTP_200_OK)
+        
 		
 class OrganizationView(APIView):
+    @swagger_auto_schema(request_body=OrganizationSerializer, responses={status.HTTP_200_OK: OrganizationSerializer})
     def post(self, request):
         serializer = OrganizationSerializer(data=request.data)
         if serializer.is_valid():
@@ -42,6 +37,7 @@ class OrganizationView(APIView):
         else:
             return Response({"message": "Erro ao cadastrar organização, confira os campos", "data": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
+    @swagger_auto_schema(request_body=None, responses={status.HTTP_200_OK: OrganizationSerializer})
     def get(self, request, id=None):
         if id:
             organization = OrganizationModel.objects.get(id=id)
@@ -51,3 +47,4 @@ class OrganizationView(APIView):
         organizations = OrganizationModel.objects.all()
         serializer = OrganizationSerializer(organizations, many=True)
         return Response({"message": "Busca completa", "data": serializer.data}, status=status.HTTP_200_OK)
+
