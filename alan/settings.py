@@ -75,7 +75,7 @@ DATABASES = {
     }
 }
 
-#padrao django
+# padrao django
 # DATABASES = {
 #     'default': {
 #         'ENGINE': 'django.db.backends.sqlite3',
