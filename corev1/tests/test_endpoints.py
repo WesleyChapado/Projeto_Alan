@@ -26,12 +26,3 @@ class EndpointsTests(APITestCase):
         response = self.client.post(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-    def test_post_organization(self):
-        url = '/v1.0/register/organization/'
-        data ={
-            "name": "OrganizationTest",
-            "status": "false",
-            "created": "2022-04-03T17:24:00-03:00"
-        }
-        response = self.client.post(url, data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
