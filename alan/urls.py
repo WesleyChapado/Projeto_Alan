@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.urls import re_path
-from corev1.views import OrganizationView, UserView
+from corev1.organization.views import OrganizationView
+from corev1.user.views import UserView
 from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi

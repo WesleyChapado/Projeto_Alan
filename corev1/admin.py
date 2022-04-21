@@ -1,5 +1,6 @@
 from django.contrib import admin
-from corev1.models import UserModel, OrganizationModel
+from corev1.user.models import UserModel
+from corev1.organization.models import OrganizationModel
 
 class UserModelAdmin(admin.ModelAdmin):
     list_display = ('id', 'first_name', 'last_name','email', 'organization')
