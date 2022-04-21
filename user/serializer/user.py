@@ -1,6 +1,6 @@
 from rest_framework import serializers
-from corev1.user.models import UserModel
-from corev1.user.validators import *
+from user.models import UserModel
+from user.validators import *
 from rest_framework.validators import UniqueValidator
 
 class UserSerializer(serializers.ModelSerializer):
@@ -8,7 +8,7 @@ class UserSerializer(serializers.ModelSerializer):
 	
 	class Meta:
 		model = UserModel
-		fields = ('__all__')
+		fields = ['id', 'email', 'first_name', 'last_name', 'organization', 'password']
 
 	def validate(self, data):
 		if not password_validation(data['password']):

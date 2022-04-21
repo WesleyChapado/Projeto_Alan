@@ -3,3 +3,4 @@ psycopg2-binary==2.9.3
 djangorestframework==3.13.1
 httplib2==0.20.4
 drf-yasg==1.20.0
+django-rest-authemail==2.1.2
