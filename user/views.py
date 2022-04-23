@@ -3,10 +3,11 @@ from user.models import UserModel
 from user.serializer.user import UserSerializer
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import status
+from rest_framework import status, permissions
 from drf_yasg.utils import swagger_auto_schema
+from oauth2_provider.contrib.rest_framework import TokenHasReadWriteScope
 
-class UserView(APIView):
+class UserCreate(APIView):
     @swagger_auto_schema(request_body=UserSerializer, responses={status.HTTP_200_OK: UserSerializer})
     def post(self, request):
         serializer = UserSerializer(data=request.data)
@@ -18,6 +19,8 @@ class UserView(APIView):
 
         return Response({"message": "Erro ao cadastrar usuário, confira os campos", "data": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
+class UserList(APIView):
+    permission_classes = [permissions.IsAuthenticated, TokenHasReadWriteScope]
     @swagger_auto_schema(request_body=None, responses={status.HTTP_200_OK: UserSerializer})
     def get(self, request, id=None):
         if id:
