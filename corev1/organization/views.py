@@ -2,12 +2,14 @@ from corev1.organization.models import OrganizationModel
 from corev1.serializer.organization import OrganizationSerializer
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import status, permissions
+from rest_framework import status
 from drf_yasg.utils import swagger_auto_schema
-from oauth2_provider.contrib.rest_framework import TokenHasReadWriteScope       
+from user.token.jwt import JWTAuthentication
+from rest_framework.permissions import IsAuthenticated      
 		
 class OrganizationView(APIView):
-    permission_classes = [permissions.IsAuthenticated, TokenHasReadWriteScope]
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
     @swagger_auto_schema(request_body=None, responses={status.HTTP_200_OK: OrganizationSerializer})
     def get(self, request, id=None):
         if id:
