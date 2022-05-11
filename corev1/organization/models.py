@@ -1,6 +1,5 @@
 from datetime import datetime
 from django.db import models
-from corev1.user.models import UserModel
 import uuid
 
 class OrganizationModel(models.Model):

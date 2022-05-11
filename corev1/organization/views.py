@@ -4,9 +4,12 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from drf_yasg.utils import swagger_auto_schema
-        
+from user.token.jwt import JWTAuthentication
+from rest_framework.permissions import IsAuthenticated      
 		
 class OrganizationView(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
     @swagger_auto_schema(request_body=None, responses={status.HTTP_200_OK: OrganizationSerializer})
     def get(self, request, id=None):
         if id:
