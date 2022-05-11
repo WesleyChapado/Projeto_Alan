@@ -40,13 +40,15 @@ class ValidacoesTests(APITestCase):
         response = self.client.post(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
-    def test_create_org_with_invalid_name(self):
-        url = '/v1.0/register/organization/'
+    def test_criar_usuario_com_nome_da_organizacao_com_mais_de_30_caratcteres(self):
+        url = '/v1.0/register/user/'
         data ={
-            # o nome da organização não pode ser maior do que 30 caracteres
-            "name": "OrganizationTest_OrganizationTest",
-            "status": "false",
-            "created": "2022-04-03T17:24:00-03:00"
+            "first_name": "UserTestFN",
+            "last_name": "UserTestLN",
+            "email": "UserTest@gmail.com",
+            "password": "1234a",
+            # o nome da organização não pode ter mais de 30 caracteres
+            "organization": "0123456789012345678901234567890123456"
         }
         response = self.client.post(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)

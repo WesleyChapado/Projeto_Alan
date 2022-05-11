@@ -7,15 +7,6 @@ from drf_yasg.utils import swagger_auto_schema
         
 		
 class OrganizationView(APIView):
-    @swagger_auto_schema(request_body=OrganizationSerializer, responses={status.HTTP_200_OK: OrganizationSerializer})
-    def post(self, request):
-        serializer = OrganizationSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response({"message": "Organização cadastrada com sucesso", "data": serializer.data}, status=status.HTTP_200_OK)
-        else:
-            return Response({"message": "Erro ao cadastrar organização, confira os campos", "data": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
-
     @swagger_auto_schema(request_body=None, responses={status.HTTP_200_OK: OrganizationSerializer})
     def get(self, request, id=None):
         if id:

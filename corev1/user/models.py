@@ -1,4 +1,3 @@
-from datetime import datetime
 from django.db import models
 import uuid
 
@@ -10,5 +9,3 @@ class UserModel(models.Model):
     password = models.CharField(max_length=30, blank=False)
     organization = models.CharField(max_length=30, blank=False)
 
-    def __str__(self):
-	    return self.first_name
