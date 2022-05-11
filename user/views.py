@@ -1,4 +1,5 @@
 from corev1.organization.models import OrganizationModel
+from corev1.plan.models import PlanModel
 from user.models import UserModel
 from user.serializer.token import LoginSerializer
 from user.serializer.user import UserSerializer
@@ -12,14 +13,24 @@ from rest_framework.permissions import IsAuthenticated
 class UserCreate(APIView):
     @swagger_auto_schema(request_body=UserSerializer, responses={status.HTTP_200_OK: UserSerializer})
     def post(self, request):
-        serializer = UserSerializer(data=request.data)
-        organization = OrganizationModel(name=request.data['organization'])    
-        if serializer.is_valid():
-            organization.save()
-            serializer.save()
-            return Response({"message": "Usuário cadastrado com sucesso", "data": serializer.data}, status=status.HTTP_200_OK)
+        user_serializer = UserSerializer(data=request.data)  
+        if user_serializer.is_valid():
+            try:
+                plan = PlanModel.objects.get(id=request.data['plan_id']) 
+            except:
+                plan = PlanModel()
+                plan.save()
 
-        return Response({"message": "Erro ao cadastrar usuário, confira os campos", "data": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+            try:
+                organization = OrganizationModel.objects.get(name=request.data['organization']) 
+            except OrganizationModel.DoesNotExist as no_organization:
+                organization = OrganizationModel(name=request.data['organization'], plan=plan)
+                organization.save()
+
+            user_serializer.save()
+            return Response({"message": "Usuário cadastrado com sucesso", "data": user_serializer.data}, status=status.HTTP_200_OK)
+
+        return Response({"message": "Erro ao cadastrar usuário, confira os campos", "data": user_serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
 class UserList(APIView):
     authentication_classes = [JWTAuthentication]
