@@ -29,11 +29,14 @@ INSTALLED_APPS = [
     #apps
     'corev1',
     'user',
+    'search',
     #terceiros
     'drf_yasg',
     #rest
     'rest_framework',
     'rest_framework.authtoken',
+    #elasticsearch
+    'django_elasticsearch_dsl',
 ]
 
 MIDDLEWARE = [
@@ -79,6 +82,12 @@ DATABASES = {
         'HOST': 'db',
         'PORT': 5432,
     }
+}
+
+ELASTICSEARCH_DSL = {
+    'default': {
+        'hosts': 'localhost:9200'
+    },
 }
 
 # padrao django
@@ -136,7 +145,8 @@ AUTH_USER_MODEL = 'user.UserModel'
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'user.token.authentication.ExpiringTokenAuthentication',
-    ]
+    ],
+    'DEFAULT_PAGINATION_CLASS': 
+        'rest_framework.pagination.LimitOffsetPagination',
+        'PAGE_SIZE': 25    
 }
-
-
