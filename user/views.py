@@ -57,18 +57,7 @@ class UserList(APIView):
         responses={status.HTTP_200_OK: UserSerializer}
     )
 
-    def get(self, request, id=None):
-        if id:
-            usuario = UserModel.objects.get(id=id)
-            serializer = UserSerializer(usuario)
-            return Response(
-                {
-                    "message": "Busca completa", 
-                    "data": serializer.data
-                }, 
-                status=status.HTTP_200_OK
-            )
-
+    def get(self, request):
         user_list = UserModel.objects.all()
         serializer = UserSerializer(user_list, many=True)
         return Response(

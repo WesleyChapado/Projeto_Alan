@@ -9,4 +9,4 @@ class FolderModel(models.Model):
     created = models.DateTimeField(default=datetime.now, blank=True)
     deleted = models.DateTimeField(blank=True, null=True)
     updated = models.DateTimeField(blank=True, null=True)
-    user_owner  = models.ForeignKey(UserModel, on_delete = models.CASCADE, null = False)
+    user_owner  = models.ForeignKey(UserModel, on_delete = models.SET_NULL, null = True)
