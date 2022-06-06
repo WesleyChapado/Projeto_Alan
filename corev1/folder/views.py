@@ -7,6 +7,7 @@ from rest_framework import status
 from drf_yasg.utils import swagger_auto_schema
 from corev1.folder import validators
 from datetime import datetime
+from user.models import UserModel
 
 class FolderView(APIView):
     permission_classes = [IsAuthenticated]
@@ -43,11 +44,13 @@ class FolderView(APIView):
     )
 
     def get(self, request):
-        folder_list = FolderModel.objects.all()
+        user_owner = validators.busca_usuario_token(request)
+        user = UserModel.objects.get(id=user_owner)
+        folder_list = FolderModel.objects.filter(user_owner=user_owner, active=True)
         serializer = FolderSerializer(folder_list, many=True)
         return Response(
             {
-                "message": "Busca completa", 
+                "message": f"Aqui estão todas as pastas do usuário {user.email}", 
                 "data": serializer.data
             }, 
             status=status.HTTP_200_OK
@@ -59,17 +62,27 @@ class FolderView(APIView):
     )
 
     def delete(self, request, pk, format=None):
-        folder = FolderModel.objects.get(pk=pk)
-        folder.deleted = datetime.utcnow()
-        folder.save()
-        serializer = FolderSerializer(folder)
-        return Response(
-            {
-                "message": "A seguinte pasta foi deletada",
-                "data" : serializer.data
-            }, 
-            status=status.HTTP_200_OK
-        )
+        try:
+            user_owner = validators.busca_usuario_token(request)
+            folder = FolderModel.objects.get(pk=pk, user_owner=user_owner, active=True)
+            folder.deleted = datetime.utcnow()
+            folder.active = False
+            folder.save()
+            serializer = FolderSerializer(folder)
+            return Response(
+                {
+                    "message": "A seguinte pasta foi deletada",
+                    "data" : serializer.data
+                }, 
+                status=status.HTTP_200_OK
+            )
+        except:
+            return Response(
+                {
+                    "message": "Id da pasta inválido, tente novamente com um id válido",
+                }, 
+                status=status.HTTP_406_NOT_ACCEPTABLE
+            )
     
     @swagger_auto_schema(
         request_body=None, 
@@ -77,17 +90,24 @@ class FolderView(APIView):
     )
 
     def put(self, request, pk, format=None):
-        folder = FolderModel.objects.get(pk=pk)
-        folder.updated = datetime.utcnow()
-        folder.name = request.data['name']
-        folder.save()
-        serializer = FolderSerializer(folder)
-        return Response(
-            {
-                "message": "A seguinte pasta foi atualizada",
-                "data" : serializer.data
-            }, 
-            status=status.HTTP_200_OK
-        )
-
-        
+        try:
+            user_owner = validators.busca_usuario_token(request)
+            folder = FolderModel.objects.get(pk=pk, user_owner=user_owner)
+            folder.updated = datetime.utcnow()
+            folder.name = request.data['name']
+            folder.save()
+            serializer = FolderSerializer(folder)
+            return Response(
+                {
+                    "message": "A seguinte pasta foi atualizada",
+                    "data" : serializer.data
+                }, 
+                status=status.HTTP_200_OK
+            )
+        except:
+            return Response(
+                {
+                    "message": "Id da pasta inválido, tente novamente com um id válido",
+                }, 
+                status=status.HTTP_406_NOT_ACCEPTABLE
+            )

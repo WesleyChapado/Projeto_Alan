@@ -4,4 +4,4 @@ from corev1.folder.models import FolderModel
 class FolderSerializer(serializers.ModelSerializer):
     class Meta:
         model = FolderModel
-        fields = ('__all__')
+        exclude = ['active']
