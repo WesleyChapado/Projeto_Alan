@@ -12,18 +12,7 @@ class PlanView(APIView):
         request_body=None, 
         responses={status.HTTP_200_OK: PlanSerializer}
     )
-    def get(self, request, id=None):
-        if id:
-            plan = PlanModel.objects.get(id=id)
-            serializer = PlanSerializer(plan)
-            return Response(
-                {
-                    "message": "Busca completa",
-                    "data" : serializer.data 
-                },
-                status = status.HTTP_200_OK
-            )
-        
+    def get(self, request):        
         plan_list = PlanModel.objects.all()
         serializer = PlanSerializer(plan_list, many=True)
         return Response (
