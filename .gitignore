@@ -1,5 +1,7 @@
 .data/
 *.pyc
 venv
-corev1/migrations
-user/migrations
+uploads
+**/migrations/**
+!**/migrations
+!**/migrations/__init__.py
