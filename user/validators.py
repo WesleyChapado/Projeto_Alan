@@ -1,6 +1,6 @@
 def password_validation(password):
     '''
-        Verifica se a senha possui ao menos 6 caracteres, uma letra mauiúscula e uma letra minúscula
+        Verifica se a senha possui ao menos 6 caracteres, uma letra maiúscula e uma letra minúscula
     '''
     if len(password) < 6:
         return False
