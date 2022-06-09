@@ -6,7 +6,7 @@ import uuid
 class FolderModel(models.Model):
     name = models.CharField(max_length=30, blank=False)
     uuid = models.UUIDField(default=uuid.uuid4, editable=False)
-    created = models.DateTimeField(default=datetime.now, blank=True)
+    created = models.DateTimeField(default=datetime.now, blank=True, editable=False)
     deleted = models.DateTimeField(blank=True, null=True)
     updated = models.DateTimeField(blank=True, null=True)
     active = models.BooleanField(blank=True, default=True)

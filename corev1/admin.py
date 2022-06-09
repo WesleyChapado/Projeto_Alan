@@ -1,4 +1,5 @@
 from django.contrib import admin
+from corev1.document.models import DocumentModel
 from corev1.folder.models import FolderModel
 from corev1.organization.models import OrganizationModel
 from corev1.plan.models import PlanModel
@@ -30,3 +31,15 @@ class FolderAdmin(admin.ModelAdmin):
     list_per_page = 20
     
 admin.site.register(FolderModel, FolderAdmin)
+
+class DocumentAdmin(admin.ModelAdmin):
+    list_display = (
+        'id', 'uuid', 'name',
+        'created', 'file_size','file', 'deleted', 'updated',
+        'active', 'user_owner'
+    )
+    list_display_links = ('id','uuid', 'user_owner', 'name', 'file')
+    search_fields = ('id', 'uuid', 'user_owner', 'name', 'file')
+    list_per_page = 20
+    
+admin.site.register(DocumentModel, DocumentAdmin)

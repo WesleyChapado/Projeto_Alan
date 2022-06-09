@@ -61,10 +61,10 @@ class FolderView(APIView):
         responses={status.HTTP_200_OK: FolderSerializer}
     )
 
-    def delete(self, request, pk, format=None):
+    def delete(self, request, uuid, format=None):
         try:
             user_owner = validators.busca_usuario_token(request)
-            folder = FolderModel.objects.get(pk=pk, user_owner=user_owner, active=True)
+            folder = FolderModel.objects.get(uuid=uuid, user_owner=user_owner, active=True)
             folder.deleted = datetime.utcnow()
             folder.active = False
             folder.save()
@@ -76,10 +76,10 @@ class FolderView(APIView):
                 }, 
                 status=status.HTTP_200_OK
             )
-        except:
+        except FolderModel.DoesNotExist:
             return Response(
                 {
-                    "message": "Id da pasta inválido, tente novamente com um id válido",
+                    "message": "Erro ao deletar pasta, uuid inválido ou pasta não pertence a este usuário",
                 }, 
                 status=status.HTTP_406_NOT_ACCEPTABLE
             )
@@ -89,25 +89,33 @@ class FolderView(APIView):
         responses={status.HTTP_200_OK: FolderSerializer}
     )
 
-    def put(self, request, pk, format=None):
+    def put(self, request, uuid, format=None):
         try:
             user_owner = validators.busca_usuario_token(request)
-            folder = FolderModel.objects.get(pk=pk, user_owner=user_owner)
+            folder = FolderModel.objects.get(uuid=uuid, user_owner=user_owner)
             folder.updated = datetime.utcnow()
-            folder.name = request.data['name']
-            folder.save()
-            serializer = FolderSerializer(folder)
+            serializer = FolderSerializer(folder, data=request.data)
+            if serializer.is_valid(): 
+                serializer.save()          
+                return Response(
+                    {
+                        "message": "A seguinte pasta foi atualizado",
+                        "data" : serializer.data
+                    }, 
+                    status=status.HTTP_200_OK
+                )
             return Response(
                 {
-                    "message": "A seguinte pasta foi atualizada",
-                    "data" : serializer.data
+                    "message": "Erro ao atualizar pasta, confira os campos", 
+                    "data": serializer.errors
                 }, 
-                status=status.HTTP_200_OK
+                status=status.HTTP_400_BAD_REQUEST
             )
-        except:
+        except FolderModel.DoesNotExist:
             return Response(
-                {
-                    "message": "Id da pasta inválido, tente novamente com um id válido",
-                }, 
-                status=status.HTTP_406_NOT_ACCEPTABLE
-            )
+            {
+                "message": "Erro ao atualizar pasta, uuid inválido ou pasta não pertence a este usuário"
+            }, 
+            status=status.HTTP_406_NOT_ACCEPTABLE
+        )
+        

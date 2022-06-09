@@ -16,27 +16,28 @@ class DocumentView(APIView):
         responses={status.HTTP_200_OK: DocumentSerializer}
     )
 
-    def post(self, request):
-        uuid_usuario = validators.busca_usuario_token(request)
-        data = request.data
-        data['user_owner'] = uuid_usuario
-        serializer = DocumentSerializer(data=data)
-        if serializer.is_valid():
-            serializer.save()
+    def post(self, request, format=None):
+        try:
+            uuid_usuario = validators.busca_usuario_token(request)
+            data = request.data
+            data['user_owner'] = uuid_usuario
+            serializer = DocumentSerializer(data=data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(
+                    {
+                        "message": "Documento cadastrado com sucesso", 
+                        "data": serializer.data
+                    }, 
+                    status=status.HTTP_200_OK
+                )
+        except:
             return Response(
                 {
-                    "message": "Documento cadastrado com sucesso", 
-                    "data": serializer.data
+                    "message": "Erro ao cadastrar documento, confira os campos name e file"
                 }, 
-                status=status.HTTP_200_OK
+                status=status.HTTP_400_BAD_REQUEST
             )
-        return Response(
-            {
-                "message": "Erro ao cadastrar documento, confira os campos", 
-                "data": serializer.errors
-            }, 
-            status=status.HTTP_400_BAD_REQUEST
-        )
 
     @swagger_auto_schema(
         request_body=None, 
@@ -61,10 +62,10 @@ class DocumentView(APIView):
         responses={status.HTTP_200_OK: DocumentSerializer}
     )
 
-    def delete(self, request, pk, format=None):
+    def delete(self, request, uuid, format=None):
         try:
             user_owner = validators.busca_usuario_token(request)
-            document = DocumentModel.objects.get(pk=pk, user_owner=user_owner, active=True)
+            document = DocumentModel.objects.get(uuid=uuid, user_owner=user_owner, active=True)
             document.deleted = datetime.utcnow()
             document.active = False
             document.save()
@@ -76,10 +77,10 @@ class DocumentView(APIView):
                 }, 
                 status=status.HTTP_200_OK
             )
-        except:
+        except DocumentModel.DoesNotExist:
             return Response(
                 {
-                    "message": "Id do documento inválido, tente novamente com um id válido",
+                    "message": "Erro ao deletar documento, uuid inválido ou documento não pertence a este usuário",
                 }, 
                 status=status.HTTP_406_NOT_ACCEPTABLE
             )
@@ -89,25 +90,32 @@ class DocumentView(APIView):
         responses={status.HTTP_200_OK: DocumentSerializer}
     )
 
-    def put(self, request, pk, format=None):
+    def put(self, request, uuid, format=None):
         try:
             user_owner = validators.busca_usuario_token(request)
-            document = DocumentModel.objects.get(pk=pk, user_owner=user_owner)
+            document = DocumentModel.objects.get(uuid=uuid, user_owner=user_owner)
             document.updated = datetime.utcnow()
-            document.name = request.data['name']
-            document.save()
-            serializer = DocumentSerializer(document)
+            serializer = DocumentSerializer(document, data=request.data)
+            if serializer.is_valid(): 
+                serializer.save()          
+                return Response(
+                    {
+                        "message": "O seguinte documento foi atualizado",
+                        "data" : serializer.data
+                    }, 
+                    status=status.HTTP_200_OK
+                )
             return Response(
                 {
-                    "message": "O seguinte documento foi atualizado",
-                    "data" : serializer.data
+                    "message": "Erro ao atualizar documento, confira os campos", 
+                    "data": serializer.errors
                 }, 
-                status=status.HTTP_200_OK
+                status=status.HTTP_400_BAD_REQUEST
             )
-        except:
+        except DocumentModel.DoesNotExist:
             return Response(
-                {
-                    "message": "Id do documento inválido, tente novamente com um id válido",
-                }, 
-                status=status.HTTP_406_NOT_ACCEPTABLE
-            )
+            {
+                "message": "Erro ao atualizar documento, uuid inválido ou documento não pertence a este usuário"
+            }, 
+            status=status.HTTP_406_NOT_ACCEPTABLE
+        )

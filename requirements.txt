@@ -5,3 +5,4 @@ httplib2==0.20.4
 drf-yasg==1.20.0
 PyJWT==2.3.0
 django-oauth-toolkit
+PyPDF2==2.1.0
