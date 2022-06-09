@@ -3,7 +3,7 @@ from django.urls import re_path
 from corev1.folder.views import FolderView
 from corev1.organization.views import OrganizationView
 from corev1.plan.views import PlanView
-from corev1.document.views import DocumentView
+from corev1.document.views import DocumentView, OpenPdfView
 from user.views import LoginView, UserCreate, UserList
 from rest_framework import permissions
 from drf_yasg.views import get_schema_view
@@ -49,4 +49,6 @@ urlpatterns = [
     path('v1.0/register/folder/<uuid>', FolderView.as_view()),
     re_path(r'^v1.0/register/document/?$', DocumentView.as_view(), name='Document'),
     path('v1.0/register/document/<uuid>', DocumentView.as_view()),
+    re_path(r'v1.0/register/pdf_reader/?$', OpenPdfView.as_view()),
+    path('v1.0/register/pdf_reader/<uuid>', OpenPdfView.as_view()),
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

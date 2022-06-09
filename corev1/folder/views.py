@@ -18,7 +18,7 @@ class FolderView(APIView):
 
     def post(self, request):
         uuid_usuario = validators.busca_usuario_token(request)
-        data = request.data
+        data = request.data.copy()
         data['user_owner'] = uuid_usuario
         folder_serializer = FolderSerializer(data=data)
         if folder_serializer.is_valid():

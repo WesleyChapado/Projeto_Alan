@@ -1,3 +1,4 @@
+from cgitb import text
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from corev1.serializer.document import DocumentSerializer
@@ -8,6 +9,7 @@ from drf_yasg.utils import swagger_auto_schema
 from user import validators
 from datetime import datetime
 from user.models import UserModel
+from corev1.document import pdf_manager
 
 class DocumentView(APIView):
     permission_classes = [IsAuthenticated]
@@ -17,27 +19,28 @@ class DocumentView(APIView):
     )
 
     def post(self, request, format=None):
-        try:
-            uuid_usuario = validators.busca_usuario_token(request)
-            data = request.data
-            data['user_owner'] = uuid_usuario
-            serializer = DocumentSerializer(data=data)
-            if serializer.is_valid():
-                serializer.save()
-                return Response(
-                    {
-                        "message": "Documento cadastrado com sucesso", 
-                        "data": serializer.data
-                    }, 
-                    status=status.HTTP_200_OK
-                )
-        except:
+        uuid_usuario = validators.busca_usuario_token(request)
+        serializer = DocumentSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save(
+                user_owner=UserModel.objects.get(id=uuid_usuario),
+                file_size=request.data['file'].size
+            )
             return Response(
                 {
-                    "message": "Erro ao cadastrar documento, confira os campos name e file"
+                    "message": "Documento cadastrado com sucesso", 
+                    "data": serializer.data
                 }, 
-                status=status.HTTP_400_BAD_REQUEST
+                status=status.HTTP_200_OK
             )
+
+        return Response(
+            {
+                "message": "Erro ao cadastrar documento, confira os campos",
+                "data": serializer.errors
+            }, 
+            status=status.HTTP_400_BAD_REQUEST
+        )
 
     @swagger_auto_schema(
         request_body=None, 
@@ -94,10 +97,12 @@ class DocumentView(APIView):
         try:
             user_owner = validators.busca_usuario_token(request)
             document = DocumentModel.objects.get(uuid=uuid, user_owner=user_owner)
-            document.updated = datetime.utcnow()
             serializer = DocumentSerializer(document, data=request.data)
-            if serializer.is_valid(): 
-                serializer.save()          
+            if serializer.is_valid():
+                serializer.save(
+                    file_size=request.data['file'].size,
+                    updated=datetime.utcnow()
+                )          
                 return Response(
                     {
                         "message": "O seguinte documento foi atualizado",
@@ -119,3 +124,21 @@ class DocumentView(APIView):
             }, 
             status=status.HTTP_406_NOT_ACCEPTABLE
         )
+
+class OpenPdfView(APIView):
+    def get(self, request, uuid):
+        try:
+            text = pdf_manager.read_using_document_uuid(uuid)
+            return Response(
+                {
+                    'message': '=)',
+                    'data': text
+                }
+            )
+        except:
+            return Response(
+                {
+                    'message': 'Informe um uui válido para a busca'
+                },
+                status.HTTP_400_BAD_REQUEST
+            )
