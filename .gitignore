@@ -6,3 +6,4 @@ uploads
 **/migrations
 **/migrations/__init__.py
 *.pdf
+esdata

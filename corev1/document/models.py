@@ -1,6 +1,7 @@
 from datetime import datetime
 from django.db import models
 from user.models import UserModel
+from corev1.folder.models import FolderModel
 import uuid
 
 class DocumentModel(models.Model):
@@ -13,3 +14,7 @@ class DocumentModel(models.Model):
     updated = models.DateTimeField(blank=True, null=True)
     active = models.BooleanField(blank=True, default=True)
     user_owner  = models.ForeignKey(UserModel, on_delete = models.SET_NULL, null = True)
+    folder = models.ForeignKey(FolderModel, on_delete = models.CASCADE, null=False)
+
+    class Meta:
+        verbose_name = "Document"

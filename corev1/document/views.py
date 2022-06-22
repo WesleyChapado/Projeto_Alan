@@ -1,4 +1,3 @@
-from cgitb import text
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from corev1.serializer.document import DocumentSerializer
@@ -9,7 +8,7 @@ from drf_yasg.utils import swagger_auto_schema
 from user import validators
 from datetime import datetime
 from user.models import UserModel
-from corev1.document import pdf_manager
+from corev1.document.pdf_manager import PdfManager
 
 class DocumentView(APIView):
     permission_classes = [IsAuthenticated]
@@ -21,11 +20,13 @@ class DocumentView(APIView):
     def post(self, request, format=None):
         uuid_usuario = validators.busca_usuario_token(request)
         serializer = DocumentSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save(
+        if serializer.is_valid() and validators.verifica_titularidade_da_pasta(request.data['folder'], uuid_usuario):
+            document = serializer.save(
                 user_owner=UserModel.objects.get(id=uuid_usuario),
                 file_size=request.data['file'].size
             )
+            document_save = PdfManager(document)
+            document_save.save()
             return Response(
                 {
                     "message": "Documento cadastrado com sucesso", 
@@ -88,57 +89,22 @@ class DocumentView(APIView):
                 status=status.HTTP_406_NOT_ACCEPTABLE
             )
 
-    @swagger_auto_schema(
-        request_body=None, 
-        responses={status.HTTP_200_OK: DocumentSerializer}
-    )
-
-    def put(self, request, uuid, format=None):
-        try:
-            user_owner = validators.busca_usuario_token(request)
-            document = DocumentModel.objects.get(uuid=uuid, user_owner=user_owner)
-            serializer = DocumentSerializer(document, data=request.data)
-            if serializer.is_valid():
-                serializer.save(
-                    file_size=request.data['file'].size,
-                    updated=datetime.utcnow()
-                )          
-                return Response(
-                    {
-                        "message": "O seguinte documento foi atualizado",
-                        "data" : serializer.data
-                    }, 
-                    status=status.HTTP_200_OK
-                )
+class SearchPdfView(APIView):
+    permission_classes = [IsAuthenticated]
+    def get(self, request):
+        uuid_usuario = validators.busca_usuario_token(request)
+        if validators.verifica_titularidade_da_pasta(request.data['folder_id'], uuid_usuario):
+            pdf_found = PdfManager.search(question=request.data['question'], kb_uuid=request.data['folder_id'])
             return Response(
                 {
-                    "message": "Erro ao atualizar documento, confira os campos", 
-                    "data": serializer.errors
-                }, 
-                status=status.HTTP_400_BAD_REQUEST
+                    'message': 'Aqui estão os arquivos que correspondem a busca',
+                    'files':str(pdf_found)
+                },
+                status.HTTP_200_OK
             )
-        except DocumentModel.DoesNotExist:
-            return Response(
-            {
-                "message": "Erro ao atualizar documento, uuid inválido ou documento não pertence a este usuário"
-            }, 
-            status=status.HTTP_406_NOT_ACCEPTABLE
-        )
-
-class OpenPdfView(APIView):
-    def get(self, request, uuid):
-        try:
-            text = pdf_manager.read_using_document_uuid(uuid)
-            return Response(
+        return Response(
                 {
-                    'message': '=)',
-                    'data': text
-                }
-            )
-        except:
-            return Response(
-                {
-                    'message': 'Informe um uui válido para a busca'
+                    'message': 'Esta pasta pertence a outro usuário'
                 },
                 status.HTTP_400_BAD_REQUEST
             )

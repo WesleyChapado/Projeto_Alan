@@ -1,20 +1,51 @@
-version: "3.9"
+version: "3.7"
 
 services:
   db:
     image: postgres
     volumes:
-    - .data/db:/var/lib/postgresql/data
+      - .data/db:/var/lib/postgresql/data
     environment:
-    - POSTGRES_DB=postgres
-    - POSTGRES_USER=postgres
-    - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    networks:
+      - alan
   web:
     build: .
     command: python manage.py runserver 0.0.0.0:8000
     volumes:
-    - .:/code
+      - .:/code
     ports:
-    - "8000:8000"
+      - "8000:8000"
     depends_on:
-    - db
+      - db
+    networks:
+      - alan
+
+  elasticsearch:
+    image: elasticsearch:7.6.0
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    environment:
+      discovery.type: single-node
+      xpack.license.self_generated.type: trial
+    networks:
+      - alan
+
+  kibana:
+    image: kibana:7.6.0
+    depends_on:
+      - elasticsearch
+    ports:
+      - "5601:5601"
+    environment:
+      SERVER_NAME: kibana
+      ELASTICSEARCH_HOSTS: '["http://elasticsearch:9200"]'
+    networks:
+      - alan
+
+networks:
+  alan:
+    driver: bridge

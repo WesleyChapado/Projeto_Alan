@@ -6,7 +6,7 @@ from rest_framework.authtoken.models import Token
 class UserEndpointsTests(APITestCase):
     def setUp(self):
         '''
-            Cria dois usuários para serem usados nos próximos testes
+            Cria o usuário para ser usado nos próximos testes
         '''
         self.user = UserModel.objects.create(
             username= "testUsername",

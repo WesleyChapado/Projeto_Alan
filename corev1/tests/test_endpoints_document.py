@@ -31,13 +31,33 @@ class DocumentEndpointsTests(APITestCase):
 
         # url usada nos testes
         self.url = '/v1.0/register/document/'
+        self.url_pasta = '/v1.0/register/folder/'
+
+        # inclui uma pasta para o usuário 1
+        request = self.client.post(
+            self.url_pasta,{
+                'name':'testNameFolder'
+            },
+            HTTP_AUTHORIZATION = f'Token {self.token_user1[0]}'
+        )
+        self.folder_user1 = request.data['data']
+
+        # inclui uma pasta para o usuário 2
+        request = self.client.post(
+            self.url_pasta,{
+                'name':'testNameFolder'
+            },
+            HTTP_AUTHORIZATION = f'Token {self.token_user2[0]}'
+        )
+        self.folder_user2 = request.data['data']
 
         # inclui um documento no banco, o usuário 1 é o proprietário
         with open('corev1/tests/pdf_test.pdf', 'rb') as file:
             self.document = self.client.post(
                 self.url,{
                     'name':'testNameDocument',
-                    'file': file
+                    'file': file,
+                    'folder': self.folder_user1['uuid']
                 },
                 HTTP_AUTHORIZATION = f'Token {self.token_user1[0]}'
             )
@@ -50,7 +70,8 @@ class DocumentEndpointsTests(APITestCase):
             response = self.client.post(
                 self.url,{
                     'name':'testNameDocument',
-                    'file': file
+                    'file': file,
+                    'folder': self.folder_user2['uuid']
                 },
                 HTTP_AUTHORIZATION = f'Token {self.token_user2[0]}'
             )
@@ -112,22 +133,17 @@ class DocumentEndpointsTests(APITestCase):
         else:
             raise AssertionError('O teste não foi executado, devido a falha na criação do documento')
     
-    def test_try_to_change_a_document_of_another_user(self):
+    def test_tries_to_create_a_document_using_another_users_folder(self):
         '''
-            Tenta atualizar um documento de outro usuário, isso não é permitido
+            Tenta criar um documento usando uma pasta de outro usuário, isso não é permitido
         '''
-        data_put = self.document.data.get('data', {})
-        if data_put:
-            uuid_put = data_put['uuid']
-            url_put = f'{self.url}{uuid_put}'
-            with open('corev1/tests/pdf_test.pdf', 'rb') as file:
-                response = self.client.put(
-                    url_put,{
-                        'name':'testNameDocument',
-                        'file': file
-                    },
-                    HTTP_AUTHORIZATION = f'Token {self.token_user2[0]}'
-                )
-            self.assertEqual(response.status_code, status.HTTP_406_NOT_ACCEPTABLE)
-        else:
-            raise AssertionError('O teste não foi executado, devido a falha na criação do documento')
+        with open('corev1/tests/pdf_test.pdf', 'rb') as file:
+            response = self.client.post(
+                self.url,{
+                    'name':'testNameDocument',
+                    'file': file,
+                    'folder': self.folder_user1['uuid']
+                },
+                HTTP_AUTHORIZATION = f'Token {self.token_user2[0]}'
+            )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)

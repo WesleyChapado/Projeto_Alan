@@ -22,12 +22,12 @@ admin.site.register(PlanModel, PlanAdmin)
 
 class FolderAdmin(admin.ModelAdmin):
     list_display = (
-        'id', 'uuid', 'name',
+        'uuid', 'name',
         'created', 'deleted', 'updated',
         'active', 'user_owner'
     )
-    list_display_links = ('id', 'user_owner', 'name')
-    search_fields = ('id', 'user_owner', 'name')
+    list_display_links = ('uuid', 'user_owner', 'name')
+    search_fields = ('uuid', 'user_owner', 'name')
     list_per_page = 20
     
 admin.site.register(FolderModel, FolderAdmin)
