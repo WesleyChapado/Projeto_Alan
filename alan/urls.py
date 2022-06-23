@@ -3,11 +3,14 @@ from django.urls import re_path
 from corev1.folder.views import FolderView
 from corev1.organization.views import OrganizationView
 from corev1.plan.views import PlanView
+from corev1.document.views import DocumentView, SearchPdfView
 from user.views import LoginView, UserCreate, UserList
 from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 from django.urls import path
+from django.conf import settings
+from django.conf.urls.static import static
 
 schema_view = get_schema_view(
    openapi.Info(
@@ -43,5 +46,8 @@ urlpatterns = [
     re_path(r'^swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     re_path(r'^v1.0/register/login/?$', LoginView.as_view(), name='Login'),
     re_path(r'^v1.0/register/folder/?$', FolderView.as_view(), name='Folder'),
-    path('v1.0/register/folder/<int:pk>', FolderView.as_view()),
-]
+    path('v1.0/register/folder/<uuid>', FolderView.as_view()),
+    re_path(r'^v1.0/register/document/?$', DocumentView.as_view(), name='Document'),
+    path('v1.0/register/document/<uuid>', DocumentView.as_view()),
+    re_path(r'v1.0/register/pdf_search/?$', SearchPdfView.as_view(), name='SearchPdf'),
+]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

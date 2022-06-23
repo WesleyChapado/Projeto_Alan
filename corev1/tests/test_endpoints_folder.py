@@ -3,7 +3,7 @@ from rest_framework.test import APITestCase
 from user.models import UserModel
 from rest_framework.authtoken.models import Token
 
-class EndpointsTests(APITestCase):
+class FolderEndpointsTests(APITestCase):
     def setUp(self):
         '''
             Cria dois usuários para serem usados nos próximos testes
@@ -26,65 +26,7 @@ class EndpointsTests(APITestCase):
         )
         self.token_user1 = Token.objects.get_or_create(user=self.user1)
         self.token_user2 = Token.objects.get_or_create(user=self.user2)
-
-    def test_post_create_user_sem_campo_plan_id(self):
-        '''
-            Cria um novo usuário, caso o campo plan_id não seja informado 
-            um plano com os valores padrões será criado, os valores são:
-                plan_type = free, 
-                max_knowledge_base = 1, 
-                max_megabyte = 5, 
-                max_users = 1
-        '''
-        url = '/v1.0/register/user/create/'
-        data ={
-            "username": "UsernameTest",
-            "first_name": "UserTestFN",
-            "last_name": "UserTestLN",
-            "email": "UserTest@gmail.com",
-            "password": "1234aB",
-            "organization": "UT",
-            "plan_id": ""
-        }
-        response = self.client.post(url, data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-    def test_get_lista_usuarios(self):
-        '''
-            Lista todos os usuários, um token deve ser informado no HEADER
-        '''
-        url = '/v1.0/register/user/list/'
-        response = self.client.get(
-            url, 
-            format='json', 
-            HTTP_AUTHORIZATION = f'Token {self.token_user1[0]}'
-        )
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-    def test_get_lista_organization(self):
-        '''
-            Lista todas as organizações, um token deve ser informado no HEADER
-        '''
-        url = '/v1.0/register/organization/'
-        response = self.client.get(
-            url, 
-            format='json', 
-            HTTP_AUTHORIZATION = f'Token {self.token_user1[0]}'
-        )
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
     
-    def test_get_lista_plans(self):
-        '''
-            Lista todos os planos, um token deve ser informado no HEADER
-        '''
-        url = '/v1.0/register/plan/'
-        response = self.client.get(
-            url, 
-            format='json', 
-            HTTP_AUTHORIZATION = f'Token {self.token_user1[0]}'
-        )
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-
     def test_post_create_folder(self):
         '''
             Cria uma pasta para o usuário 1
@@ -147,8 +89,8 @@ class EndpointsTests(APITestCase):
         )
         data_delete = response_post.data.get('data', {})
         if data_delete:
-            id_delete = data_delete['id']
-            url_delete = f'/v1.0/register/folder/{id_delete}'
+            uuid_delete = data_delete['uuid']
+            url_delete = f'/v1.0/register/folder/{uuid_delete}'
             response_delete = self.client.delete(
                 url_delete,
                 format='json',
@@ -174,8 +116,8 @@ class EndpointsTests(APITestCase):
         )
         data_put = response_post.data.get('data', {})
         if data_put:
-            id_put = data_put['id']
-            url_put = f'/v1.0/register/folder/{id_put}'
+            uuid_put = data_put['uuid']
+            url_put = f'/v1.0/register/folder/{uuid_put}'
             data_put ={
             "name" : "testNewFolderName"
         }
@@ -188,3 +130,4 @@ class EndpointsTests(APITestCase):
             self.assertEqual(response_put.status_code, status.HTTP_406_NOT_ACCEPTABLE)
         else:
             raise AssertionError('O teste não foi executado, devido a falha na criação da pasta')
+            
