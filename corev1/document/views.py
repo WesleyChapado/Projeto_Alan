@@ -1,6 +1,8 @@
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
+from corev1.dialog.models import DialogModel
 from corev1.serializer.document import DocumentSerializer
+from corev1.serializer.dialog import DialogSerializer
 from corev1.document.models import DocumentModel
 from rest_framework.response import Response
 from rest_framework import status
@@ -94,11 +96,17 @@ class SearchPdfView(APIView):
     def get(self, request):
         uuid_usuario = validators.busca_usuario_token(request)
         if validators.verifica_titularidade_da_pasta(request.data['folder_id'], uuid_usuario):
-            pdf_found = PdfManager.search(question=request.data['question'], kb_uuid=request.data['folder_id'])
+            dialog_id = PdfManager.search(
+                question=request.data['question'], 
+                kb_uuid=request.data['folder_id'], 
+                uuid_usuario = uuid_usuario
+            )
+            answer = DialogModel.objects.filter(dialog_id=dialog_id)
+            serializer = DialogSerializer(answer, many=True)
             return Response(
                 {
                     'message': 'Aqui estão os arquivos que correspondem a busca',
-                    'files':str(pdf_found)
+                    'data': serializer.data
                 },
                 status.HTTP_200_OK
             )

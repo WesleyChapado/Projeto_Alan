@@ -1,12 +1,13 @@
-import uuid
 import PyPDF2
 from corev1.document.models import DocumentModel
 from corev1.folder.models import FolderModel
 from user.models import UserModel
 from elasticsearch import Elasticsearch
 from polyglot.detect import Detector
+from corev1.dialog.models import DialogModel
 import nltk
 import os
+import uuid
 
 class PdfManager():
     def __init__(self, document):
@@ -110,9 +111,9 @@ class PdfManager():
             }
             self.es.index(index=self.kb_uuid, body=doc)
 
-    def search(question, kb_uuid):
+    def search(question, kb_uuid, uuid_usuario):
         '''
-            Retorna uma lista de documentos que correspondem a busca
+            Retorna o id do dialog com todas as respostas  do usuário
         '''
         es = Elasticsearch(["http://elasticsearch:9200"])
         res = es.search(
@@ -125,15 +126,22 @@ class PdfManager():
                 }
             }
         )
-        list_file_uuid = []
-        list_file = []
+        dialog_id = uuid.uuid4()
+        user_owner = UserModel.objects.get(id=uuid_usuario)
         for hit in res['hits']['hits']:
-            file_uuid = hit["_source"]['file_uuid']
-            if file_uuid not in list_file_uuid:
-                list_file_uuid.append(file_uuid)
+            file = DocumentModel.objects.get(
+                uuid = hit["_source"]['file_uuid']
+            )
+            dialog = DialogModel(
+                question = question,
+                answer = hit["_source"]['text'],
+                file = file.file.name,
+                user_owner = user_owner,
+                dialog_id = dialog_id,
+                answer_id = hit["_id"],
+                folder_name = hit["_source"]['folder_name']
+            )
+            dialog.save()
+        return dialog_id
 
-        for file_uuid in list_file_uuid:
-            document = DocumentModel.objects.get(uuid=file_uuid)
-            list_file.append(document.file.name)
-        return list_file
 

@@ -3,6 +3,7 @@ from corev1.document.models import DocumentModel
 from corev1.folder.models import FolderModel
 from corev1.organization.models import OrganizationModel
 from corev1.plan.models import PlanModel
+from corev1.dialog.models import DialogModel
 
 class OrganizationAdmin(admin.ModelAdmin):
     list_display = ('id', 'name', 'status','created')
@@ -43,3 +44,15 @@ class DocumentAdmin(admin.ModelAdmin):
     list_per_page = 20
     
 admin.site.register(DocumentModel, DocumentAdmin)
+
+class DialogAdmin(admin.ModelAdmin):
+    list_display = (
+        'question', 'answer', 'file', 
+        'user_owner', 'dialog_id', 'answer_id',
+        'folder_name', 'created'
+    )
+    list_display_links = ('dialog_id', 'user_owner')
+    search_fields = ('dialog_id', 'user_owner')
+    list_per_page = 20
+    
+admin.site.register(DialogModel, DialogAdmin)
